@@ -1,0 +1,124 @@
+# Python
+**pycache**/
+*.py[cod]
+*$py.class
+*.so
+
+# Python build / distribution
+build/
+dist/
+*.egg-info/
+.eggs/
+pip-wheel-metadata/
+
+# Test / coverage
+.pytest_cache/
+.coverage
+.coverage.*
+htmlcov/
+.tox/
+.nox/
+
+# Type checking / linting
+.mypy_cache/
+.pyre/
+.ruff_cache/
+
+
+# Virtual Environments
+.venv/
+venv/
+env/
+env_*/
+ENV/
+env.bak/
+venv.bak/
+
+
+# Django
+*.log
+db.sqlite3
+db.sqlite3-journal
+
+# Django media uploads
+media/
+
+# Collected static files
+staticfiles/
+
+# Local Django configuration
+local_settings.py
+
+# Environment Variables / Secrets
+.env
+.env.*
+!.env.example
+
+# PostgreSQL
+*.dump
+*.sql
+
+# macOS
+.DS_Store
+**/.DS_Store
+
+.AppleDouble
+.LSOverride
+
+._*
+.Spotlight-V100
+.Trashes
+
+# IDE / Editors
+.vscode/
+.idea/
+
+# VS Code workspace files
+*.code-workspace
+
+# Vim
+*.swp
+*.swo
+
+# Sublime Text
+*.sublime-workspace
+*.sublime-project
+
+# Jupyter Notebook
+.ipynb_checkpoints/
+
+# Node.js / Frontend (if applicable)
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Frontend build output
+dist/
+build/
+
+# OS / Temporary Files
+*.tmp
+*.temp
+*.bak
+*.swp
+*.swo
+*~
+
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+
+# Project-Specific Generated Files
+# Uploaded auction images
+media/auction_images/
+
+# Generated reports / exports
+reports/generated/
+
+# Local development files
+*.sqlite3
+*.sqlite3-journal
