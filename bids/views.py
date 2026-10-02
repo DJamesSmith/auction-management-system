@@ -23,8 +23,7 @@ def place_bid(request, auction_id):
             auction = (
                 Auction.objects
                 .select_for_update()
-                .get(pk=auction_id)
-            )
+                .get(pk=auction_id))
         except Auction.DoesNotExist:
             messages.error(request, "Auction not found.")
             return redirect("live_auctions")
@@ -42,19 +41,12 @@ def place_bid(request, auction_id):
             messages.error(request, "This auction has ended.")
             return redirect("live_auctions")
 
-        latest_bid = (
-            Bid.objects
+        latest_bid = (Bid.objects
             .filter(auction=auction)
             .order_by("-amount", "-created_at")
-            .first()
-        )
+            .first())
 
-        current_price = (
-            latest_bid.amount
-            if latest_bid
-            else auction.starting_price
-        )
-
+        current_price = latest_bid.amount if latest_bid else auction.starting_price
         next_bid_amount = current_price + auction.minimum_bid_increment
         Bid.objects.create(auction=auction, bidder=request.user, amount=next_bid_amount)
 
