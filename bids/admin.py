@@ -1,7 +1,14 @@
 from django.contrib import admin
 from .models import Bid
 
-admin.site.register(Bid)
+
+@admin.register(Bid)
+class BidAdmin(admin.ModelAdmin):
+    list_display = ("auction", "bidder", "amount", "created_at",)
+    list_filter = ("created_at",)
+    search_fields = ("auction__item_name", "bidder__email",)
+    readonly_fields = ("auction", "bidder", "amount", "created_at",)
+
 
 # so an administrator can inspect bid records;
 # Django Admin having full CRUD access to Bid records

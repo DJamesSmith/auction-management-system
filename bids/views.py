@@ -2,6 +2,7 @@ from django.contrib.auth.decorators import login_required
 from django.db import transaction
 from django.http import JsonResponse
 from django.utils import timezone
+from django.shortcuts import render
 
 from auctions.models import Auction
 from .models import Bid
@@ -67,3 +68,13 @@ def place_bid(request, auction_id):
         "current_price": str(next_bid_amount),
         "next_bid_amount": str(next_bid_amount + auction.minimum_bid_increment),
     })
+
+
+@login_required(login_url="login")
+def bid_history(request):
+    bids = (
+        Bid.objects
+        .select_related("auction", "auction__category", "bidder")
+        .order_by("-created_at"))
+
+    return render(request, "bids/bid_history.html", { "bids": bids })
