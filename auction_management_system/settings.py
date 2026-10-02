@@ -22,6 +22,7 @@ INSTALLED_APPS = [
     # django apps
     'accounts',
     'auctions',
+    'bids',
 ]
 
 MIDDLEWARE = [

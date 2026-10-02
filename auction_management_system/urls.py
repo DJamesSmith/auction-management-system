@@ -10,6 +10,7 @@ urlpatterns = [
     path('', views.dashboard, name='home'),
     path('accounts/', include('accounts.urls')),
     path('auctions/', include('auctions.urls')),
+    path('bids/', include('bids.urls')),
 ]
 
 if settings.DEBUG:

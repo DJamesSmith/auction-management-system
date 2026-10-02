@@ -5,6 +5,8 @@ from django.http import HttpRequest, HttpResponse
 
 from .forms import AuctionForm
 from .models import Auction, Category
+from bids.models import Bid
+from django.db.models import Prefetch
 
 
 @login_required
@@ -25,19 +27,15 @@ def create_auction(request):
             return redirect('my_auctions')
 
         else:
-            return render(request,'auctions/create_auction.html',
-                {
-                    'categories': categories,
-                    'form': form,
-                    'data': request.POST
-                }
-            )
+            return render(request, 'auctions/create_auction.html', {
+                'categories': categories,
+                'form': form,
+                'data': request.POST
+            })
 
-    return render(request,'auctions/create_auction.html',
-        {
-            'categories': categories
-        }
-    )
+    return render(request,'auctions/create_auction.html', {
+        'categories': categories
+    })
 
 
 @login_required
@@ -49,20 +47,38 @@ def my_auctions(request):
     for auction in auctions:
         auction.update_status()
 
-    return render(
-        request,
-        'auctions/my_auctions.html',
-        {
-            'auctions': auctions
-        }
-    )
+    return render(request, 'auctions/my_auctions.html', { 'auctions': auctions })
 
 
 @login_required
 def live_auctions(request: HttpRequest) -> HttpResponse:
-    context: dict = {}
+    # Move approved auctions into ACTIVE when their scheduled start time
+    # has arrived, and close active auctions whose end time has passed.
+    scheduled_auctions = Auction.objects.filter(status__in=['APPROVED', 'ACTIVE'])
 
-    return render(request, 'live_auctions.html', context)
+    for auction in scheduled_auctions:
+        auction.update_status()
+
+    live_auctions_queryset = (
+        Auction.objects
+        .filter(status='ACTIVE')
+        .select_related('category', 'seller')
+        .prefetch_related(
+            Prefetch(
+                'bids',
+                queryset=Bid.objects.order_by('-amount', '-created_at'),
+                to_attr='ordered_bids',
+            ))
+        .order_by('end_datetime'))
+
+    for auction in live_auctions_queryset:
+        latest_bid = auction.ordered_bids[0] if auction.ordered_bids else None
+
+        auction.current_price =  latest_bid.amount if latest_bid else auction.starting_price
+        auction.next_bid_amount = auction.current_price + auction.minimum_bid_increment
+
+    return render(request, 'auctions/live_auctions.html', { 'auctions': live_auctions_queryset })
+
 
 
 @login_required
