@@ -3,13 +3,14 @@ from django.contrib.auth.decorators import login_required
 from django.db import transaction
 from django.shortcuts import render, redirect
 from django.utils import timezone
+from django.http import HttpRequest, HttpResponse
 
 from auctions.models import Auction
 from .models import Bid
 
 
 @login_required(login_url="login")
-def place_bid(request, auction_id):
+def place_bid(request: HttpRequest, auction_id) -> HttpResponse:
     if request.method != "POST":
         messages.error(request, "Only POST requests are allowed.")
         return redirect("live_auctions")
@@ -56,7 +57,7 @@ def place_bid(request, auction_id):
 
 
 @login_required(login_url="login")
-def bid_history(request):
+def bid_history(request: HttpRequest) -> HttpResponse:
     bids = (
         Bid.objects
         .select_related("auction", "auction__category", "bidder")
