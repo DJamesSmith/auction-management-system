@@ -1,6 +1,7 @@
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect
+from django.http import HttpRequest, HttpResponse
 
 from .forms import AuctionForm
 from .models import Auction, Category
@@ -55,6 +56,13 @@ def my_auctions(request):
             'auctions': auctions
         }
     )
+
+
+@login_required
+def live_auctions(request: HttpRequest) -> HttpResponse:
+    context: dict = {}
+
+    return render(request, 'live_auctions.html', context)
 
 
 @login_required
@@ -144,17 +152,4 @@ def cancel_auction(request, auction_id):
         )
 
     return redirect('my_auctions')
-
-
-
-
-
-
-
-
-
-
-
-
-
 

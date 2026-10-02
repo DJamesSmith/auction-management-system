@@ -1,0 +1,45 @@
+/* Core structure for the entire live badge */
+.live-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-family: system-ui, -apple-system, sans-serif;
+    font-weight: 700;
+    font-size: 14px;
+    color: #1a1a1a;
+}
+
+/* The solid inner red dot */
+.live-badge-dot {
+    width: 12px;
+    height: 12px;
+    background-color: #ff3b30; /* A modern, vibrant red */
+    border-radius: 50%;
+    position: relative;
+}
+
+/* The pulsating outer ring effect */
+.live-badge-dot::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: #ff3b30;
+    border-radius: 50%;
+    z-index: -1;
+    animation: live-pulse 1.6s infinite ease-out;
+}
+
+/* The animation mechanics */
+@keyframes live-pulse {
+    0% {
+        transform: scale(1);
+        opacity: 0.8;
+    }
+    100% {
+        transform: scale(2.6);
+        opacity: 0;
+    }
+}
