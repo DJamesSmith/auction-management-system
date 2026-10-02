@@ -1,0 +1,218 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<div class="container mt-5">
+
+    <div class="row justify-content-center">
+
+        <div class="col-md-8">
+
+            <div class="card shadow-sm">
+
+                <div class="card-header">
+                    <h4 class="mb-0">Edit Auction</h4>
+                </div>
+
+                <div class="card-body">
+
+                    <form method="POST" enctype="multipart/form-data">
+
+                        {% csrf_token %}
+
+                        <!-- Item Name -->
+                        <div class="mb-3">
+                            <label class="form-label">Item Name</label>
+
+                            <input type="text"
+                                   name="item_name"
+                                   class="form-control"
+                                   value="{{ auction.item_name }}"
+                                   required>
+
+                            {% if form.item_name.errors %}
+                                <div class="text-danger mt-1">
+                                    {{ form.item_name.errors }}
+                                </div>
+                            {% endif %}
+                        </div>
+
+
+                        <!-- Category -->
+                        <div class="mb-3">
+                            <label class="form-label">Category</label>
+
+                            <select name="category" class="form-select" required>
+
+                                <option value="">Select Category</option>
+
+                                {% for category in categories %}
+
+                                    <option value="{{ category.id }}"
+                                        {% if auction.category.id == category.id %}
+                                            selected
+                                        {% endif %}>
+                                        {{ category.name }}
+                                    </option>
+
+                                {% endfor %}
+
+                            </select>
+
+                            {% if form.category.errors %}
+                                <div class="text-danger mt-1">
+                                    {{ form.category.errors }}
+                                </div>
+                            {% endif %}
+                        </div>
+
+
+                        <!-- Description -->
+                        <div class="mb-3">
+                            <label class="form-label">Description</label>
+
+                            <textarea name="description"
+                                      class="form-control"
+                                      rows="4"
+                                      required>{{ auction.description }}</textarea>
+
+                            {% if form.description.errors %}
+                                <div class="text-danger mt-1">
+                                    {{ form.description.errors }}
+                                </div>
+                            {% endif %}
+                        </div>
+
+
+                        <!-- Image -->
+                        <div class="mb-3">
+                            <label class="form-label">Image</label>
+
+                            {% if auction.image %}
+                                <div class="mb-2">
+                                    <img src="{{ auction.image.url }}"
+                                         alt="{{ auction.item_name }}"
+                                         style="width: 150px; height: 100px; object-fit: cover;">
+                                </div>
+                            {% endif %}
+
+                            <input type="file"
+                                   name="image"
+                                   class="form-control">
+
+                            {% if form.image.errors %}
+                                <div class="text-danger mt-1">
+                                    {{ form.image.errors }}
+                                </div>
+                            {% endif %}
+                        </div>
+
+
+                        <!-- Starting Price -->
+                        <div class="mb-3">
+                            <label class="form-label">Starting Price</label>
+
+                            <input type="number"
+                                   name="starting_price"
+                                   class="form-control"
+                                   step="0.01"
+                                   value="{{ auction.starting_price }}"
+                                   required>
+
+                            {% if form.starting_price.errors %}
+                                <div class="text-danger mt-1">
+                                    {{ form.starting_price.errors }}
+                                </div>
+                            {% endif %}
+                        </div>
+
+
+                        <!-- Minimum Bid Increment -->
+                        <div class="mb-3">
+                            <label class="form-label">
+                                Minimum Bid Increment
+                            </label>
+
+                            <input type="number"
+                                   name="minimum_bid_increment"
+                                   class="form-control"
+                                   step="0.01"
+                                   value="{{ auction.minimum_bid_increment }}"
+                                   required>
+
+                            {% if form.minimum_bid_increment.errors %}
+                                <div class="text-danger mt-1">
+                                    {{ form.minimum_bid_increment.errors }}
+                                </div>
+                            {% endif %}
+                        </div>
+
+
+                        <!-- Start Date Time -->
+                        <div class="mb-3">
+                            <label class="form-label">
+                                Start Date & Time
+                            </label>
+
+                            <input type="datetime-local"
+                                   name="start_datetime"
+                                   class="form-control"
+                                   value="{{ auction.start_datetime|date:'Y-m-d\TH:i' }}"
+                                   required>
+
+                            {% if form.start_datetime.errors %}
+                                <div class="text-danger mt-1">
+                                    {{ form.start_datetime.errors }}
+                                </div>
+                            {% endif %}
+                        </div>
+
+
+                        <!-- End Date Time -->
+                        <div class="mb-3">
+                            <label class="form-label">
+                                End Date & Time
+                            </label>
+
+                            <input type="datetime-local"
+                                   name="end_datetime"
+                                   class="form-control"
+                                   value="{{ auction.end_datetime|date:'Y-m-d\TH:i' }}"
+                                   required>
+
+                            {% if form.end_datetime.errors %}
+                                <div class="text-danger mt-1">
+                                    {{ form.end_datetime.errors }}
+                                </div>
+                            {% endif %}
+                        </div>
+
+
+                        <!-- Buttons -->
+                        <div class="d-flex gap-2">
+
+                            <button type="submit"
+                                    class="btn btn-primary">
+                                Update Auction
+                            </button>
+
+                            <a href="{% url 'my_auctions' %}"
+                               class="btn btn-secondary">
+                                Cancel
+                            </a>
+
+                        </div>
+
+                    </form>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}
