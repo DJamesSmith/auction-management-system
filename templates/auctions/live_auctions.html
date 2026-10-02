@@ -64,15 +64,12 @@
                             </div>
 
                             {% if request.user.role == 'GENERAL_USER' %}
-                                <button
-                                    type="button"
-                                    class="btn btn-primary w-100 mt-auto place-bid-btn"
-                                    data-auction-id="{{ auction.id }}"
-                                    data-url="{% url 'place_bid' auction.id %}"
-                                    data-increment="{{ auction.minimum_bid_increment }}">
-                                    Bid ₹<span class="next-bid-price-{{ auction.id }}">{{ auction.next_bid_amount|floatformat:2 }}</span>
-                                </button>
-                                <div id="bid-message-{{ auction.id }}" class="small mt-2"></div>
+                                <form method="POST" action="{% url 'place_bid' auction.id %}" class="mt-auto">
+                                    {% csrf_token %}
+                                    <button type="submit" class="btn btn-primary w-100">
+                                        Bid ₹{{ auction.next_bid_amount|floatformat:2 }}
+                                    </button>
+                                </form>
                             {% else %}
                                 <button type="button" class="btn btn-secondary w-100 mt-auto" disabled> Admins Cannot Bid </button>
                             {% endif %}
@@ -88,81 +85,5 @@
         </div>
     {% endif %}
 </div>
-
-{% if request.user.role == 'GENERAL_USER' and auctions %}
-<script>
-$(document).ready(function () {
-
-    $(".place-bid-btn").on("click", function () {
-
-        const button = $(this);
-        const auctionId = button.data("auction-id");
-        const url = button.data("url");
-        const messageBox = $("#bid-message-" + auctionId);
-
-        button.prop("disabled", true);
-        messageBox.removeClass("text-danger text-success").text("Placing bid...");
-
-        $.ajax({
-            url: url,
-            type: "POST",
-            headers: {
-                "X-CSRFToken": "{{ csrf_token }}"
-            },
-            success: function (response) {
-
-                if (response.status === "success") {
-
-                    $("#current-price-" + auctionId).text(
-                        Number(response.current_price).toFixed(2)
-                    );
-
-                    $(".next-bid-price-" + auctionId).text(
-                        Number(response.next_bid_amount).toFixed(2)
-                    );
-
-                    messageBox
-                        .addClass("text-success")
-                        .text(response.message);
-
-                } else {
-
-                    messageBox
-                        .addClass("text-danger")
-                        .text(response.message);
-                }
-            },
-            error: function (xhr) {
-
-                const response = xhr.responseJSON;
-
-                messageBox
-                    .addClass("text-danger")
-                    .text(
-                        response && response.message
-                            ? response.message
-                            : "Unable to place the bid."
-                    );
-            },
-            complete: function (xhr) {
-
-                // Re-enable the button only when the auction is still active.
-                if (
-                    xhr.status !== 400 &&
-                    xhr.status !== 403 &&
-                    xhr.status !== 404
-                ) {
-                    button.prop("disabled", false);
-                } else {
-                    button.prop("disabled", true);
-                }
-            }
-        });
-    });
-
-});
-</script>
-
-{% endif %}
 
 {% endblock %}
