@@ -50,10 +50,9 @@ def my_auctions(request):
     return render(request, 'auctions/my_auctions.html', { 'auctions': auctions })
 
 
+# objective is to move approved auctions into ACTIVE when their scheduled start time has arrived, and close active auctions whose end time has passed.
 @login_required
 def live_auctions(request: HttpRequest) -> HttpResponse:
-    # Move approved auctions into ACTIVE when their scheduled start time
-    # has arrived, and close active auctions whose end time has passed.
     scheduled_auctions = Auction.objects.filter(status__in=['APPROVED', 'ACTIVE'])
 
     for auction in scheduled_auctions:
