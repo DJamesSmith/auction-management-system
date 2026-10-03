@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 {% extends 'base.html' %}
 {% block content %}
 
@@ -237,4 +238,245 @@
     </div>
 </div>
 
+=======
+{% extends 'base.html' %}
+{% block content %}
+
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <h4 class="mb-0">Create Auction</h4>
+                </div>
+
+                <div class="card-body">
+
+                    <!-- Success/Error messages -->
+                    {% if messages %}
+                        {% for message in messages %}
+                            <div class="alert alert-{{ message.tags }}">
+                                {{ message }}
+                            </div>
+                        {% endfor %}
+                    {% endif %}
+
+
+                    <form method="POST" enctype="multipart/form-data">
+
+                        {% csrf_token %}
+
+                        <!-- Item Name -->
+                        <div class="mb-3">
+
+                            <label class="form-label">Item Name</label>
+
+                            <input
+                                type="text"
+                                name="item_name"
+                                class="form-control"
+                                value="{{ data.item_name|default:'' }}"
+                            >
+
+                            {% if form.item_name.errors %}
+                                <small class="text-danger">
+                                    {{ form.item_name.errors.0 }}
+                                </small>
+                            {% endif %}
+
+                        </div>
+
+
+                        <!-- Description -->
+                        <div class="mb-3">
+
+                            <label class="form-label">Description</label>
+
+                            <textarea
+                                name="description"
+                                class="form-control"
+                                rows="4"
+                            >{{ data.description|default:'' }}</textarea>
+
+                            {% if form.description.errors %}
+                                <small class="text-danger">
+                                    {{ form.description.errors.0 }}
+                                </small>
+                            {% endif %}
+
+                        </div>
+
+
+                        <!-- Category -->
+                        <div class="mb-3">
+
+                            <label class="form-label">Category</label>
+
+                            <select
+                                name="category"
+                                class="form-select"
+                            >
+
+                                <option value="">
+                                    Select Category
+                                </option>
+
+                                {% for category in categories %}
+
+                                    <option
+                                        value="{{ category.id }}"
+                                        {% if data.category == category.id|stringformat:"s" %}
+                                            selected
+                                        {% endif %}
+                                    >
+                                        {{ category.name }}
+                                    </option>
+
+                                {% endfor %}
+
+                            </select>
+
+                            {% if form.category.errors %}
+                                <small class="text-danger">
+                                    {{ form.category.errors.0 }}
+                                </small>
+                            {% endif %}
+
+                        </div>
+
+
+                        <!-- Image -->
+                        <div class="mb-3">
+
+                            <label class="form-label">Item Image</label>
+
+                            <input
+                                type="file"
+                                name="image"
+                                class="form-control"
+                            >
+
+                            {% if form.image.errors %}
+                                <small class="text-danger">
+                                    {{ form.image.errors.0 }}
+                                </small>
+                            {% endif %}
+
+                        </div>
+
+
+                        <!-- Starting Price -->
+                        <div class="mb-3">
+
+                            <label class="form-label">Starting Price</label>
+
+                            <input
+                                type="number"
+                                name="starting_price"
+                                class="form-control"
+                                step="0.01"
+                                value="{{ data.starting_price|default:'' }}"
+                            >
+
+                            {% if form.starting_price.errors %}
+                                <small class="text-danger">
+                                    {{ form.starting_price.errors.0 }}
+                                </small>
+                            {% endif %}
+
+                        </div>
+
+
+                        <!-- Minimum Bid Increment -->
+                        <div class="mb-3">
+
+                            <label class="form-label">Minimum Bid Increment</label>
+
+                            <input
+                                type="number"
+                                name="minimum_bid_increment"
+                                class="form-control"
+                                step="0.01"
+                                value="{{ data.minimum_bid_increment|default:'' }}"
+                            >
+
+                            {% if form.minimum_bid_increment.errors %}
+                                <small class="text-danger">
+                                    {{ form.minimum_bid_increment.errors.0 }}
+                                </small>
+                            {% endif %}
+
+                        </div>
+
+
+                        <!-- Start Date -->
+                        <div class="mb-3">
+
+                            <label class="form-label">
+                                Auction Start Date/Time
+                            </label>
+
+                            <input
+                                type="datetime-local"
+                                name="start_datetime"
+                                class="form-control"
+                                value="{{ data.start_datetime|default:'' }}"
+                            >
+
+                            {% if form.start_datetime.errors %}
+                                <small class="text-danger">
+                                    {{ form.start_datetime.errors.0 }}
+                                </small>
+                            {% endif %}
+
+                        </div>
+
+
+                        <!-- End Date -->
+                        <div class="mb-3">
+
+                            <label class="form-label">
+                                Auction End Date/Time
+                            </label>
+
+                            <input
+                                type="datetime-local"
+                                name="end_datetime"
+                                class="form-control"
+                                value="{{ data.end_datetime|default:'' }}"
+                            >
+
+                            {% if form.end_datetime.errors %}
+                                <small class="text-danger">
+                                    {{ form.end_datetime.errors.0 }}
+                                </small>
+                            {% endif %}
+
+                        </div>
+
+
+                        <!-- Buttons -->
+                        <button
+                            type="submit"
+                            class="btn btn-primary"
+                        >
+                            Create Auction
+                        </button>
+
+                        <a
+                            href="/dashboard/"
+                            class="btn btn-secondary"
+                        >
+                            Cancel
+                        </a>
+
+                    </form>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+>>>>>>> 7159795b6044deffa8701f4b9b7a29f57ca8987b
 {% endblock %}

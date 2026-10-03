@@ -23,7 +23,10 @@ INSTALLED_APPS = [
     'accounts',
     'auctions',
     'bids',
+<<<<<<< HEAD
     'permissionApp'
+=======
+>>>>>>> 7159795b6044deffa8701f4b9b7a29f57ca8987b
 ]
 
 MIDDLEWARE = [

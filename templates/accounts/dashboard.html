@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 {% extends 'base.html' %}
 {% block content %}
 
@@ -10,4 +11,18 @@
     </div>
 </div>
 
+=======
+{% extends 'base.html' %}
+{% block content %}
+
+<div class="card">
+    <div class="card-body">
+        <h2>Welcome {{ request.user.email }}</h2>
+        <hr>
+        <p>Phone: {{ request.user.phone }}</p>
+        <p>Role: {{ request.user.role }}</p>
+    </div>
+</div>
+
+>>>>>>> 7159795b6044deffa8701f4b9b7a29f57ca8987b
 {% endblock %}
