@@ -3,36 +3,22 @@ from django.contrib.auth.decorators import login_required
 from django.db import transaction
 from django.shortcuts import render, redirect
 from django.utils import timezone
-<<<<<<< HEAD
 from permissionApp.decorators import permission_required
-=======
-from django.http import HttpRequest, HttpResponse
->>>>>>> 7159795b6044deffa8701f4b9b7a29f57ca8987b
 
 from auctions.models import Auction
 from .models import Bid
 
 
 @login_required(login_url="login")
-<<<<<<< HEAD
 @permission_required("PLACE_BID")
 def place_bid(request, auction_id):
-=======
-def place_bid(request: HttpRequest, auction_id) -> HttpResponse:
->>>>>>> 7159795b6044deffa8701f4b9b7a29f57ca8987b
     if request.method != "POST":
         messages.error(request, "Only POST requests are allowed.")
         return redirect("live_auctions")
 
-<<<<<<< HEAD
     # if request.user.role != "GENERAL_USER":
     #     messages.error(request, "Administrators are not allowed to place bids.")
     #     return redirect("live_auctions")
-=======
-    if request.user.role != "GENERAL_USER":
-        messages.error(request, "Administrators are not allowed to place bids.")
-        return redirect("live_auctions")
->>>>>>> 7159795b6044deffa8701f4b9b7a29f57ca8987b
 
     with transaction.atomic():
         try:
@@ -72,14 +58,6 @@ def place_bid(request: HttpRequest, auction_id) -> HttpResponse:
 
 
 @login_required(login_url="login")
-<<<<<<< HEAD
 def bid_history(request):
     bids = (Bid.objects.select_related("auction", "auction__category", "bidder").order_by("-created_at"))
-=======
-def bid_history(request: HttpRequest) -> HttpResponse:
-    bids = (
-        Bid.objects
-        .select_related("auction", "auction__category", "bidder")
-        .order_by("-created_at"))
->>>>>>> 7159795b6044deffa8701f4b9b7a29f57ca8987b
     return render(request, "bids/bid_history.html", {"bids": bids})
