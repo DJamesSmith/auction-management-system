@@ -7,6 +7,7 @@ from .forms import AuctionForm
 from .models import Auction, Category
 from bids.models import Bid
 from django.db.models import Prefetch
+from decimal import Decimal, InvalidOperation
 
 
 @login_required
@@ -42,12 +43,40 @@ def create_auction(request):
 def my_auctions(request):
     auctions = Auction.objects.filter(
         seller=request.user
-    ).order_by('-created_at')
+    ).select_related('category').order_by('-created_at')
+
+    item_name = request.GET.get('item_name', '').strip()
+    category_id = request.GET.get('category', '').strip()
+    max_price = request.GET.get('max_price', '').strip()
+
+    if item_name:
+        auctions = auctions.filter(item_name__icontains=item_name)
+
+    if category_id and category_id.isdigit():
+        auctions = auctions.filter(category_id=category_id)
+    elif category_id:
+        category_id = ''
+
+    if max_price:
+        try:
+            Decimal(max_price)
+        except (InvalidOperation, ValueError):
+            max_price = ''
+        else:
+            auctions = auctions.filter(starting_price__lte=max_price)
 
     for auction in auctions:
         auction.update_status()
 
-    return render(request, 'auctions/my_auctions.html', { 'auctions': auctions })
+    categories = Category.objects.all().order_by('name')
+
+    return render(request, 'auctions/my_auctions.html', { 
+        'auctions': auctions,
+        'categories': categories,
+        'item_name': item_name,
+        'selected_category': category_id,
+        'max_price': max_price,
+    })
 
 
 # objective is to move approved auctions into ACTIVE when their scheduled start time has arrived, and close active auctions whose end time has passed.
@@ -57,6 +86,10 @@ def live_auctions(request: HttpRequest) -> HttpResponse:
 
     for auction in scheduled_auctions:
         auction.update_status()
+
+    item_name = request.GET.get('item_name', '').strip()
+    category_id = request.GET.get('category', '').strip()
+    max_price = request.GET.get('max_price', '').strip()
 
     live_auctions_queryset = (
         Auction.objects
@@ -70,13 +103,37 @@ def live_auctions(request: HttpRequest) -> HttpResponse:
             ))
         .order_by('end_datetime'))
 
+    if item_name:
+        live_auctions_queryset = live_auctions_queryset.filter(item_name__icontains=item_name)
+
+    if category_id and category_id.isdigit():
+        live_auctions_queryset = live_auctions_queryset.filter(category_id=category_id)
+    elif category_id:
+        category_id = ''
+
+    if max_price:
+        try:
+            Decimal(max_price)
+        except (InvalidOperation, ValueError):
+            max_price = ''
+        else:
+            live_auctions_queryset = live_auctions_queryset.filter(starting_price__lte=max_price)
+
     for auction in live_auctions_queryset:
         latest_bid = auction.ordered_bids[0] if auction.ordered_bids else None
 
         auction.current_price =  latest_bid.amount if latest_bid else auction.starting_price
         auction.next_bid_amount = auction.current_price + auction.minimum_bid_increment
 
-    return render(request, 'auctions/live_auctions.html', { 'auctions': live_auctions_queryset })
+    categories = Category.objects.all().order_by('name')
+
+    return render(request, 'auctions/live_auctions.html', { 
+        'auctions': live_auctions_queryset,
+        'categories': categories,
+        'item_name': item_name,
+        'selected_category': category_id,
+        'max_price': max_price,
+    })
 
 
 

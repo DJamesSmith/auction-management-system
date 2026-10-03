@@ -9,6 +9,17 @@
                 View all bids placed by users across the auction platform.
             </p>
         </div>
+
+        {% if can_delete_bids and has_own_bids %}
+            <form method="POST"
+                  action="{% url 'delete_all_bid_history' %}"
+                  onsubmit="return confirm('Are you sure you want to delete all of your bid history? This action cannot be undone.');">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-danger">
+                    Delete All My Bids
+                </button>
+            </form>
+        {% endif %}
     </div>
 
     {% if bids %}
@@ -22,6 +33,9 @@
                         <th>Bidder</th>
                         <th>Bid Amount</th>
                         <th>Bid Placed At</th>
+                        {% if can_delete_bids %}
+                            <th>Action</th>
+                        {% endif %}
                     </tr>
                 </thead>
                 <tbody>
@@ -39,6 +53,19 @@
                             <td>
                                 {{ bid.created_at|date:"d M Y, h:i A" }}
                             </td>
+
+                            {% if can_delete_bids %}
+                                <td>
+                                    {% if bid.bidder_id == request.user.id %}
+                                        <form method="POST" action="{% url 'delete_bid' bid.id %}" onsubmit="return confirm('Are you sure you want to delete this bid?');" class="d-inline">
+                                            {% csrf_token %}
+                                            <button type="submit" class="btn btn-outline-danger btn-sm" title="Delete your bid" aria-label="Delete your bid">
+                                                <i class="bi bi-trash3"></i>
+                                            </button>
+                                        </form>
+                                    {% endif %}
+                                </td>
+                            {% endif %}
                         </tr>
                     {% endfor %}
                 </tbody>

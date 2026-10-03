@@ -4,6 +4,7 @@ from django.db import transaction
 from django.shortcuts import render, redirect
 from django.utils import timezone
 from permissionApp.decorators import permission_required
+from permissionApp.models import UserPermission
 
 from auctions.models import Auction
 from .models import Bid
@@ -60,4 +61,48 @@ def place_bid(request, auction_id):
 @login_required(login_url="login")
 def bid_history(request):
     bids = (Bid.objects.select_related("auction", "auction__category", "bidder").order_by("-created_at"))
-    return render(request, "bids/bid_history.html", {"bids": bids})
+
+    can_delete_bids = UserPermission.objects.filter(user=request.user, permission__name="DELETE_BID").exists()
+    has_own_bids = Bid.objects.filter(bidder=request.user).exists()
+
+    return render(request, "bids/bid_history.html", {
+        "bids": bids,
+        "can_delete_bids": can_delete_bids,
+        "has_own_bids": has_own_bids,
+    })
+
+
+@login_required(login_url="login")
+@permission_required("DELETE_BID")
+def delete_bid(request, bid_id):
+    if request.method != "POST":
+        messages.error(request, "Only POST requests are allowed.")
+        return redirect("bid_history")
+
+    try:
+        bid = Bid.objects.get(pk=bid_id, bidder=request.user)
+    except Bid.DoesNotExist:
+        messages.error(request, "You are not authorized to delete this bid.")
+        return redirect("bid_history")
+
+    bid.delete()
+    messages.success(request, "Bid deleted successfully.")
+
+    return redirect("bid_history")
+
+
+@login_required(login_url="login")
+@permission_required("DELETE_BID")
+def delete_all_bid_history(request):
+    if request.method != "POST":
+        messages.error(request, "Only POST requests are allowed.")
+        return redirect("bid_history")
+
+    deleted_count, _ = Bid.objects.filter(bidder=request.user).delete()
+
+    if deleted_count:
+        messages.success(request, f"{deleted_count} of your bid record(s) deleted successfully.")
+    else:
+        messages.info(request, "You do not have any bid history to delete.")
+
+    return redirect("bid_history")

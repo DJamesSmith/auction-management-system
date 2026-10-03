@@ -114,10 +114,10 @@ AUTHENTICATION_BACKENDS = ["accounts.backends.EmailOrPhoneBackend"]             
 # }
 
 
-# # NOTE
-# # https://docs.google.com/document/d/1v_IaO-ZmVgkroburEN4OH3K3mvXdndlHM-7qdU_J-rI/edit?tab=t.0
+# NOTE
+# https://docs.google.com/document/d/1v_IaO-ZmVgkroburEN4OH3K3mvXdndlHM-7qdU_J-rI/edit?tab=t.0
 
 
-# # psql -U django_user -d auction_management_db
-# # CREATE DATABASE auction_management_db OWNER django_user;
-# # DROP DATABASE auction_management_db
+# psql -U django_user -d auction_management_db
+# CREATE DATABASE auction_management_db OWNER django_user;
+# DROP DATABASE auction_management_db
