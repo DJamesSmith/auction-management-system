@@ -1,0 +1,1 @@
+PLACE_BID = "PLACE_BID"

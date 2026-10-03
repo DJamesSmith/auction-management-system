@@ -1,0 +1,56 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container-fluid px-0">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="mb-1">Bid History</h2>
+            <p class="text-muted mb-0">
+                View all bids placed by users across the auction platform.
+            </p>
+        </div>
+    </div>
+
+    {% if bids %}
+        <div class="table-responsive shadow-sm">
+            <table class="table table-bordered table-hover align-middle mb-0">
+                <thead class="table-dark">
+                    <tr>
+                        <th>#</th>
+                        <th>Auction</th>
+                        <th>Category</th>
+                        <th>Bidder</th>
+                        <th>Bid Amount</th>
+                        <th>Bid Placed At</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for bid in bids %}
+                        <tr>
+                            <td>{{ forloop.counter }}</td>
+                            <td>
+                                <strong>{{ bid.auction.item_name }}</strong>
+                            </td>
+                            <td>{{ bid.auction.category.name }}</td>
+                            <td>{{ bid.bidder.name }}</td>
+                            <td>
+                                <strong>₹{{ bid.amount|floatformat:2 }}</strong>
+                            </td>
+                            <td>
+                                {{ bid.created_at|date:"d M Y, h:i A" }}
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% else %}
+        <div class="text-center py-5">
+            <h4>No Bids Yet</h4>
+            <p class="text-muted mb-0">
+                No bids have been placed on any auction yet.
+            </p>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}
