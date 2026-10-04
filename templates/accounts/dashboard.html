@@ -1,12 +1,113 @@
 {% extends 'base.html' %}
 {% block content %}
 
-<div class="card">
-    <div class="card-body">
-        <h2>Welcome {{ request.user.email }}</h2>
-        <hr>
-        <p>Phone: {{ request.user.phone }}</p>
-        <p>Role: {{ request.user.role }}</p>
+<div class="container mt-5">
+    <div class="mb-4">
+        <h2 class="fw-bold">Dashboard</h2>
+        <p class="text-muted mb-0"> Welcome {% if request.user.name %}{{ request.user.name }}{% else %}{{ request.user.email }}{% endif %}. </p>
+    </div>
+
+    <!-- Summary -->
+    <div class="row g-4 mb-5">
+        <div class="col-md-3">
+            <div class="card shadow-sm h-100">
+                <div class="card-body">
+                    <p class="text-muted mb-1">My Auctions</p>
+                    <h3 class="fw-bold mb-0">{{ own_auctions_count }}</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card shadow-sm h-100">
+                <div class="card-body">
+                    <p class="text-muted mb-1">Active Auctions</p>
+                    <h3 class="fw-bold mb-0">{{ active_auctions_count }}</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card shadow-sm h-100">
+                <div class="card-body">
+                    <p class="text-muted mb-1">Bids Placed</p>
+                    <h3 class="fw-bold mb-0">{{ bids_placed_count }}</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card shadow-sm h-100 border-success">
+                <div class="card-body">
+                    <p class="text-muted mb-1">Winning Auctions</p>
+                    <h3 class="fw-bold text-success mb-0">{{ winning_auctions_count }}</h3>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Won Auctions -->
+    <div class="card shadow-sm">
+        <div class="card-header bg-success text-white"> <h4 class="mb-0">Won Auctions</h4> </div>
+        <div class="card-body">
+            {% if won_auctions %}
+                <div class="row g-4">
+                    {% for auction in won_auctions %}
+                        <div class="col-md-6 col-lg-4">
+                            <div class="card h-100 border-success">
+                                {% if auction.image %}
+                                    <img src="{{ auction.image.url }}" class="card-img-top" alt="{{ auction.item_name }}" style="height: 200px; object-fit: cover;">
+                                {% else %}
+                                    <div class="bg-light d-flex align-items-center justify-content-center" style="height: 200px;">
+                                        <span class="text-muted">No Image</span>
+                                    </div>
+                                {% endif %}
+
+                                <div class="card-body">
+                                    <div class="d-flex justify-content-between align-items-start mb-2">
+                                        <h5 class="card-title fw-bold mb-0"> {{ auction.item_name }} </h5>
+                                        <span class="badge bg-success"> WINNER </span>
+                                    </div>
+                                    <p class="text-muted mb-2"> {{ auction.category.name }} </p>
+                                    <p class="mb-2"> <strong>Winning Bid:</strong> ₹{{ auction.winning_amount|floatformat:2 }} </p>
+                                    <p class="mb-2"> <strong>Seller:</strong> {% if auction.seller.name %}{{ auction.seller.name }}{% else %}{{ auction.seller.email }}{% endif %} </p>
+                                    <p class="mb-2"> <strong>Auction Ended:</strong> {{ auction.end_datetime|date:"d M Y, h:i A" }} </p>
+                                    {% if auction.transaction %}
+                                        <p class="mb-0">
+                                            <strong>Transaction:</strong>
+                                            <span class="badge bg-success"> {{ auction.transaction.get_status_display }} </span>
+                                        </p>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+
+                </div>
+            {% else %}
+                <div class="text-center py-4">
+                    <h5>No Winning Auctions Yet</h5>
+                    <p class="text-muted mb-0"> Auctions that you win will appear here after they close. </p>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Dashboard Navigation -->
+    <div class="row g-3 mt-4 mb-5">
+        <div class="col-md-3">
+            <a href="{% url 'my_auctions' %}" class="btn btn-outline-primary w-100">
+                My Auctions
+            </a>
+        </div>
+        <div class="col-md-3">
+            <a href="{% url 'bid_history' %}" class="btn btn-outline-primary w-100">
+                Bid History
+            </a>
+        </div>
+        <div class="col-md-3">
+            <a href="{% url 'live_auctions' %}" class="btn btn-outline-success w-100">
+                Live Auctions
+            </a>
+        </div>
+
     </div>
 </div>
 

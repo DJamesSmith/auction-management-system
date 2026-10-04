@@ -1,4 +1,4 @@
-from django.db import models
+from django.db import models, transaction
 from accounts.models import User
 from django.utils import timezone
 
@@ -34,6 +34,20 @@ class Auction(models.Model):
     start_datetime = models.DateTimeField()
     end_datetime = models.DateTimeField()
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='PENDING')
+
+    # These fields permanently record the result when the auction closes.
+    winner = models.ForeignKey(
+        User,
+        on_delete=models.SET_NULL,
+        related_name='won_auctions',
+        blank=True,
+        null=True)
+    winning_amount = models.DecimalField(
+        max_digits=12,
+        decimal_places=2,
+        blank=True,
+        null=True)
+
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -45,8 +59,51 @@ class Auction(models.Model):
         now = timezone.now()
         if self.status == 'APPROVED' and now >= self.start_datetime:
             self.status = 'ACTIVE'
-            self.save(update_fields=['status'])
+            self.save(update_fields=['status', 'updated_at'])
 
         elif self.status == 'ACTIVE' and now >= self.end_datetime:
-            self.status = 'CLOSED'
-            self.save(update_fields=['status'])
+            from bids.models import Bid
+            
+            winning_bid = (
+                Bid.objects
+                .filter(auction=self)
+                .select_related('bidder')
+                .order_by('-amount', '-created_at')
+                .first())
+
+            with transaction.atomic():
+                self.status = 'CLOSED'
+
+                if winning_bid:
+                    self.winner = winning_bid.bidder
+                    self.winning_amount = winning_bid.amount
+
+                self.save(update_fields=['status', 'winner', 'winning_amount', 'updated_at'])
+
+                if winning_bid:
+                    Transaction.objects.update_or_create(
+                        auction=self,
+                        defaults={
+                            'seller': self.seller,
+                            'buyer': winning_bid.bidder,
+                            'winning_amount': winning_bid.amount,
+                            'status': 'COMPLETED',
+                            'transaction_date': now,
+                        })
+
+
+class Transaction(models.Model):
+    STATUS_CHOICES = (
+        ('PENDING', 'Pending'),
+        ('COMPLETED', 'Completed'),
+        ('CANCELLED', 'Cancelled'))
+
+    auction = models.OneToOneField(Auction, on_delete=models.CASCADE, related_name='transaction')
+    seller = models.ForeignKey(User, on_delete=models.CASCADE, related_name='sold_transactions')
+    buyer = models.ForeignKey(User, on_delete=models.CASCADE, related_name='purchased_transactions')
+    winning_amount = models.DecimalField(max_digits=12, decimal_places=2)
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='PENDING')
+    transaction_date = models.DateTimeField()
+
+    def __str__(self):
+        return f'Transaction for {self.auction.item_name} - ₹{self.winning_amount}'
