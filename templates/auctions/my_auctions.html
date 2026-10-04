@@ -92,6 +92,27 @@
                                 <span class="badge bg-danger"> Rejected </span>
                             {% endif %}
 
+                            {% if auction.status == 'CLOSED' %}
+                                <div class="alert {% if auction.winner %}alert-success{% else %}alert-secondary{% endif %} mt-3 mb-0">
+                                    {% if auction.winner %}
+                                        <div class="fw-bold mb-1"> <i class="bi bi-trophy-fill"></i> Winning Bidder </div>
+                                        <div>
+                                            {% if auction.winner.name %}
+                                                {{ auction.winner.name }}
+                                            {% else %}
+                                                {{ auction.winner.email }}
+                                            {% endif %}
+                                        </div>
+                                        <div class="small mt-1"> Winning Amount: <strong>₹{{ auction.winning_amount|floatformat:2 }}</strong> </div>
+                                        {% if auction.transaction %}
+                                            <div class="small mt-1"> Transaction: <strong>{{ auction.transaction.get_status_display }}</strong> </div>
+                                        {% endif %}
+                                    {% else %}
+                                        <div class="fw-bold"> No Winning Bidder </div>
+                                        <div class="small"> This auction closed without any valid bids. </div>
+                                    {% endif %}
+                                </div>
+                            {% endif %}
 
                             <!-- Buttons -->
                             <div class="mt-4 d-flex gap-2">
