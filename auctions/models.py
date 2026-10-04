@@ -90,8 +90,8 @@ class Auction(models.Model):
                             'status': 'COMPLETED',
                             'transaction_date': now,
                         })
-            
-            
+
+
 class Transaction(models.Model):
     STATUS_CHOICES = (
         ('PENDING', 'Pending'),
@@ -107,4 +107,3 @@ class Transaction(models.Model):
 
     def __str__(self):
         return f'Transaction for {self.auction.item_name} - ₹{self.winning_amount}'
-            
