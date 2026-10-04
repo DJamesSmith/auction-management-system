@@ -92,19 +92,19 @@ class Auction(models.Model):
                         })
             
             
-            class Transaction(models.Model):
-                STATUS_CHOICES = (
-                    ('PENDING', 'Pending'),
-                    ('COMPLETED', 'Completed'),
-                    ('CANCELLED', 'Cancelled'))
-            
-                auction = models.OneToOneField(Auction, on_delete=models.CASCADE, related_name='transaction')
-                seller = models.ForeignKey(User, on_delete=models.CASCADE, related_name='sold_transactions')
-                buyer = models.ForeignKey(User, on_delete=models.CASCADE, related_name='purchased_transactions')
-                winning_amount = models.DecimalField(max_digits=12, decimal_places=2)
-                status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='PENDING')
-                transaction_date = models.DateTimeField()
-            
-                def __str__(self):
-                    return f'Transaction for {self.auction.item_name} - ₹{self.winning_amount}'
+class Transaction(models.Model):
+    STATUS_CHOICES = (
+        ('PENDING', 'Pending'),
+        ('COMPLETED', 'Completed'),
+        ('CANCELLED', 'Cancelled'))
+
+    auction = models.OneToOneField(Auction, on_delete=models.CASCADE, related_name='transaction')
+    seller = models.ForeignKey(User, on_delete=models.CASCADE, related_name='sold_transactions')
+    buyer = models.ForeignKey(User, on_delete=models.CASCADE, related_name='purchased_transactions')
+    winning_amount = models.DecimalField(max_digits=12, decimal_places=2)
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='PENDING')
+    transaction_date = models.DateTimeField()
+
+    def __str__(self):
+        return f'Transaction for {self.auction.item_name} - ₹{self.winning_amount}'
             
