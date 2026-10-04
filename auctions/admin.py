@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Auction, Category
+from .models import Auction, Category, Transaction
 
 
 admin.site.register(Category)
@@ -7,6 +7,17 @@ admin.site.register(Category)
 
 @admin.register(Auction)
 class AuctionAdmin(admin.ModelAdmin):
+
+    list_display = (
+        'item_name',
+        'seller',
+        'status',
+        'winner',
+        'winning_amount',
+        'end_datetime',
+    )
+
+    list_select_related = ('seller', 'winner')
 
     actions = [
         'approve_auctions',
@@ -40,3 +51,19 @@ class AuctionAdmin(admin.ModelAdmin):
             request,
             f'{updated} auction(s) rejected successfully.'
         )
+
+
+@admin.register(Transaction)
+class TransactionAdmin(admin.ModelAdmin):
+
+    list_display = (
+        'id',
+        'auction',
+        'seller',
+        'buyer',
+        'winning_amount',
+        'status',
+        'transaction_date',
+    )
+
+    list_select_related = ('auction', 'seller', 'buyer')

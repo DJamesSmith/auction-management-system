@@ -41,9 +41,10 @@ def create_auction(request):
 
 @login_required
 def my_auctions(request):
-    auctions = Auction.objects.filter(
-        seller=request.user
-    ).select_related('category').order_by('-created_at')
+    auctions = (Auction.objects.filter(seller=request.user)
+    .select_related('category', 'winner')
+    .select_related('transaction')
+    .order_by('-created_at'))
 
     item_name = request.GET.get('item_name', '').strip()
     category_id = request.GET.get('category', '').strip()

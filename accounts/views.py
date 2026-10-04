@@ -5,6 +5,8 @@ from django.views.decorators.cache import never_cache
 
 from django.contrib import messages
 from .models import User
+from auctions.models import Auction
+from bids.models import Bid
 
 @never_cache
 @login_required(login_url='login')
@@ -65,7 +67,31 @@ def login_view(request):
 @never_cache
 @login_required(login_url='login')
 def dashboard(request):
-    response = render(request,"accounts/dashboard.html")
+    user = request.user
+    
+    own_auctions = Auction.objects.filter(seller=user)
+
+    active_auctions_count = Auction.objects.filter(status='ACTIVE').count()
+    own_auctions_count = own_auctions.count()
+    bids_placed_count = Bid.objects.filter(bidder=user).count()
+
+    won_auctions = (
+        Auction.objects
+        .filter(winner=user, status='CLOSED')
+        .select_related('seller', 'category')
+        .select_related('transaction')
+        .order_by('-end_datetime')
+    )
+
+    context = {
+        'own_auctions_count': own_auctions_count,
+        'active_auctions_count': active_auctions_count,
+        'bids_placed_count': bids_placed_count,
+        'winning_auctions_count': won_auctions.count(),
+        'won_auctions': won_auctions,
+    }
+
+    response = render(request,"accounts/dashboard.html", context)
     
     response["Cache-Control"] = "no-cache, no-store, must-revalidate"
     response["Pragma"] = "no-cache"
