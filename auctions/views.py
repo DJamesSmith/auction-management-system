@@ -1,14 +1,14 @@
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect
-from django.http import HttpRequest, HttpResponse
+from django.http import HttpRequest, HttpResponse, JsonResponse
 
 from .forms import AuctionForm
 from .models import Auction, Category
 from bids.models import Bid
 from django.db.models import Prefetch
 from decimal import Decimal, InvalidOperation
-
+from permissionApp.decorators import permission_required
 
 @login_required
 def create_auction(request):
@@ -139,6 +139,7 @@ def live_auctions(request: HttpRequest) -> HttpResponse:
 
 
 @login_required
+@permission_required("EDIT_AUCTION")
 def edit_auction(request, auction_id):
 
     auction = Auction.objects.get(
@@ -208,7 +209,7 @@ def cancel_auction(request, auction_id):
         seller=request.user
     )
 
-    if auction.status in ['PENDING', 'APPROVED']:
+    if auction.status in ['PENDING', 'APPROVED', 'CLOSED']:
 
         auction.delete()
 
@@ -226,3 +227,12 @@ def cancel_auction(request, auction_id):
 
     return redirect('my_auctions')
 
+
+
+def auction_timer(request, auction_id):
+    auction = Auction.objects.get(id=auction_id)
+
+    return JsonResponse({
+        "status": True,
+        "start_datetime": auction.start_datetime.isoformat()
+    })

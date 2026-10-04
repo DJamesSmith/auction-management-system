@@ -1,1 +1,598 @@
-tatha
+AUCTION MANAGEMENT SYSTEM
+
+PROJECT OVERVIEW
+
+The Auction Management System is a Django-based web application where registered users can create auctions, view live auctions, place bids, and track their auction and bidding activities.
+
+There are two main types of users:
+
+1. Admin / Superuser
+2. General User
+
+The Admin has higher-level control over users, auctions, permissions, and system management. General Users have limited functionalities based on the permissions provided by the Admin.
+
+1. HOW TO RUN THE PROJECT
+
+Step 1: Create a virtual environment.
+
+Use:
+
+python -m venv venv
+
+Activate it on Windows:
+
+venv\Scripts\activate
+
+Step 2: Install the required dependencies.
+
+If requirements.txt is available, use:
+
+pip install -r requirements.txt
+
+Step 3: Apply migrations.
+
+Run:
+
+python manage.py makemigrations
+
+Then:
+
+python manage.py migrate
+
+Step 4: Create the Admin/Superuser.
+
+The Admin account is created using Django's built-in command:
+
+python manage.py createsuperuser
+
+Enter the required credentials.
+
+The Admin can then access the Django Admin Panel through:
+
+/admin/
+
+Step 5: Start the development server.
+
+Run:
+
+python manage.py runserver
+
+Then open the application in the browser:
+
+http://127.0.0.1:8000/
+
+2. USER REGISTRATION
+
+A new General User must first register through the application's registration page.
+
+After successful registration, the user can log in using the login page.
+
+General Users are different from the Admin/Superuser.
+
+3. ADMIN
+
+The Admin account is created separately using:
+
+python manage.py createsuperuser
+
+The Admin uses these credentials to access the Django Admin Panel.
+
+The Admin is responsible for administrative operations such as:
+
+* Managing users
+* Managing categories
+* Reviewing auctions
+* Approving auctions
+* Rejecting auctions
+* Assigning permissions
+* Managing bids and other application data where applicable
+
+The Admin does NOT participate in bidding.
+
+4. GENERAL USER
+
+A General User can perform normal application operations such as:
+
+* Register
+* Login
+* Create an auction
+* View their own auctions
+* View live auctions
+* Place bids when the required permission is provided
+* View bid history
+* View winning bids
+* View auction results
+* Edit auctions when the required permission is provided
+* Delete bid history when the required permission is provided
+* Cancel their own auctions where allowed
+
+5. PERMISSION SYSTEM
+
+The application contains a permission system controlled by the Admin.
+
+Some operations require permission from the Admin.
+
+Examples include:
+
+* Edit Auction
+* Place Bid
+* Delete Bid History
+* Other restricted operations configured in the application
+
+The Admin gives the required permission to the General User.
+
+If the user has the required permission, the corresponding functionality becomes available.
+
+If the user does not have the permission, the functionality is not available.
+
+For example:
+
+Admin gives "Bid" permission
+→ User can place bids.
+
+Admin does not give "Bid" permission
+→ User cannot place bids.
+
+The application should also verify the permission in the backend. Hiding a button alone should not be considered sufficient security.
+
+6. CREATING AN AUCTION
+
+A General User can create an auction from the Create Auction option.
+
+The user provides information such as:
+
+* Item name
+* Description
+* Category
+* Image
+* Starting price
+* Minimum bid increment
+* Start date/time
+* End date/time
+
+After creation, the auction normally starts with PENDING status.
+
+Auction flow:
+
+PENDING
+→ Admin reviews
+→ APPROVED
+
+7. ADMIN APPROVAL
+
+The Admin reviews the auction from the Admin Panel.
+
+The Admin can approve or reject the auction.
+
+If approved:
+
+PENDING → APPROVED
+
+If rejected:
+
+PENDING → REJECTED
+
+An approved auction waits until its configured start time.
+
+8. START COUNTDOWN
+
+After the Admin approves an auction, a "Starts in" countdown is displayed.
+
+Example:
+
+Starts in: 02:15:30
+
+The countdown uses jQuery AJAX.
+
+The flow is:
+
+Browser loads the page
+→ JavaScript finds the countdown
+→ AJAX sends a request to Django
+→ Django gets the auction start time from the database
+→ Django returns the time using JsonResponse
+→ AJAX receives the JSON response
+→ JavaScript calculates the remaining time
+→ JavaScript updates the HTML every second
+
+The AJAX timer only displays the countdown.
+
+It does NOT change the auction status.
+
+The existing backend logic is responsible for changing the auction status.
+
+9. LIVE AUCTIONS
+
+When the auction reaches its configured start time, it becomes ACTIVE/LIVE according to the backend logic.
+
+The Live Auctions page displays the auctions currently available for bidding.
+
+Users can view information such as:
+
+* Item name
+* Category
+* Starting price
+* Current bid
+* Auction timing
+* Other auction information
+
+10. PLACING A BID
+
+A General User can place a bid only if the Admin has provided the required bidding permission.
+
+The basic flow is:
+
+User registers
+→ User logs in
+→ Admin provides bidding permission
+→ User opens Live Auctions
+→ User selects a live auction
+→ User places a valid bid
+
+The Admin does NOT place bids.
+
+The Admin only manages the system and permissions.
+
+11. BID VALIDATION
+
+When a user places a bid, the application validates the bid according to the auction rules.
+
+The bid should satisfy the required conditions such as:
+
+* Auction is active
+* User has bidding permission
+* Bid amount is valid
+* Bid follows the minimum bid increment
+* Auction has not ended
+
+Invalid bids should not be accepted.
+
+12. AUCTION CLOSING
+
+When the auction reaches its end time, it becomes CLOSED according to the backend logic.
+
+General flow:
+
+PENDING
+→ APPROVED
+→ ACTIVE
+→ CLOSED
+
+13. WINNING BID
+
+After the auction closes, the highest valid bid becomes the winning bid.
+
+The winning bid and winner can be displayed inside the auction card.
+
+Example:
+
+Winning Bid: ₹5,500
+Winner: Rahul
+
+14. WINNER FOR THE SELLER
+
+If a General User created an auction, the seller can see the winning bid and winner after the auction is closed.
+
+Example:
+
+My Auction:
+
+Laptop
+
+Status: CLOSED
+
+Winning Bid: ₹45,000
+
+Winner: User123
+
+Therefore, the user who created the auction can see who won that auction.
+
+15. DASHBOARD
+
+The General User Dashboard provides an overview of the user's activities.
+
+Depending on the implementation, it can show:
+
+* Auctions created by the user
+* Bids placed by the user
+* Winning bids
+* Auction results
+* Bid history
+* Other user-specific information
+
+The user should only see information related to their own account.
+
+16. BID HISTORY
+
+The Bid History page contains the user's bidding records.
+
+It can show:
+
+* Auction
+* Bid amount
+* Bid date/time
+* Auction result
+* Winning information where applicable
+
+Bid history is not automatically deleted when an auction closes.
+
+It remains available unless the user performs the permitted deletion operation.
+
+17. DELETE BID HISTORY
+
+Deleting bid history is a permission-controlled operation.
+
+The Admin must provide the required permission.
+
+If the user has permission:
+
+Delete button is visible
+→ User clicks Delete
+→ Backend verifies permission
+→ Bid history is deleted
+
+If the user does not have permission:
+
+Delete button is not visible
+→ User cannot perform the deletion operation
+
+The backend should also verify the permission even if someone manually tries to access the delete URL.
+
+18. EDIT AUCTION
+
+Editing an auction is also permission-controlled.
+
+If the Admin provides the required Edit permission, the user can see and use the Edit option where applicable.
+
+If the permission is not provided, the user cannot perform the restricted edit operation.
+
+The backend should verify the permission before allowing the edit.
+
+19. CANCEL AUCTION
+
+A seller can cancel their own auction where cancellation is allowed.
+
+The user can cancel an auction that they created.
+
+The application verifies that the auction belongs to the currently logged-in user.
+
+Example:
+
+User creates Auction A
+→ User opens My Auctions
+→ User clicks Cancel
+→ Backend verifies ownership
+→ Auction is cancelled/deleted according to the application rules
+→ User is redirected back to My Auctions
+
+20. CLOSED AUCTION REMOVAL
+
+After an auction is closed, the seller may no longer need that auction in the My Auctions list.
+
+Therefore, a Cancel/Delete option can be provided for closed auctions.
+
+The flow is:
+
+CLOSED auction
+→ Seller clicks Cancel
+→ Backend processes the cancellation/deletion
+→ Auction is removed from My Auctions
+
+21. MY AUCTIONS
+
+The My Auctions page shows only the auctions created by the currently logged-in user.
+
+It can contain:
+
+* Auction image
+* Item name
+* Category
+* Starting price
+* Start date/time
+* End date/time
+* Status
+* Countdown where applicable
+* Edit button
+* Cancel button
+* Winning bid
+* Winner information
+
+22. LIVE AUCTIONS VS MY AUCTIONS
+
+My Auctions:
+
+Shows only the auctions created by the currently logged-in user.
+
+Live Auctions:
+
+Shows auctions that are currently active and available for bidding.
+
+Therefore:
+
+My Auctions = User's own auctions
+
+Live Auctions = Auctions available for bidding
+
+23. AUCTION STATUS FLOW
+
+The normal auction lifecycle is:
+
+PENDING
+→ APPROVED
+→ ACTIVE / LIVE
+→ CLOSED
+
+Other possible outcomes are:
+
+PENDING
+→ REJECTED
+
+Allowed auction
+→ CANCELLED / DELETED
+
+The exact status transition is handled by the backend.
+
+24. ADMIN FUNCTIONALITIES
+
+The Admin can:
+
+* Access Django Admin
+* Manage users
+* Manage categories
+* Review auctions
+* Approve auctions
+* Reject auctions
+* Assign permissions
+* Manage application data
+* Manage configured administrative operations
+
+The Admin cannot participate as a bidder.
+
+25. GENERAL USER FUNCTIONALITIES
+
+A General User can:
+
+* Register
+* Login
+* Create auctions
+* View their own auctions
+* View live auctions
+* Place bids if permission is provided
+* View bid history
+* View winning bids
+* View auction results
+* Edit auctions if permission is provided
+* Delete bid history if permission is provided
+* Cancel their own auctions where allowed
+
+26. IMPORTANT SECURITY RULE
+
+Permissions should be checked in the backend.
+
+For example, even if the Edit button is hidden from a user, the user should not be able to bypass the restriction by manually entering the edit URL.
+
+The backend must check:
+
+* Is the user logged in?
+* Does the user own the auction where ownership is required?
+* Does the user have the required permission?
+* Is the auction in a valid status for the requested operation?
+
+Only after these checks should the requested operation be performed.
+
+27. COMPLETE GENERAL USER FLOW
+
+Register
+→ Login
+→ Admin provides required permissions
+→ Create auction
+→ Auction becomes PENDING
+→ Admin reviews auction
+→ Admin approves auction
+→ Auction becomes APPROVED
+→ Starts-in countdown is displayed
+→ Start time is reached
+→ Auction becomes ACTIVE/LIVE
+→ Permitted users place bids
+→ Auction reaches end time
+→ Auction becomes CLOSED
+→ Highest valid bid becomes the winning bid
+→ Winner is displayed
+→ Seller can see the winning bid and winner
+→ User can view relevant information from Dashboard and Bid History
+
+28. FIRST-TIME SETUP CHECKLIST
+
+For a new developer or person running the project:
+
+1. Create the virtual environment.
+
+2. Activate the virtual environment.
+
+3. Install the required dependencies.
+
+4. Configure the database.
+
+5. Run migrations.
+
+6. Create the Admin/Superuser.
+
+7. Start the Django development server.
+
+8. Open the application.
+
+9. Register a General User.
+
+10. Login as the General User.
+
+11. Login to the Django Admin Panel using the Superuser account.
+
+12. Configure categories and required permissions.
+
+13. Test auction creation.
+
+14. Approve the auction from the Admin Panel.
+
+15. Verify the start countdown.
+
+16. Verify the auction becomes LIVE/ACTIVE.
+
+17. Provide bidding permission to a General User.
+
+18. Test bidding.
+
+19. Verify auction closing.
+
+20. Verify the winning bid and winner.
+
+21. Verify the Dashboard.
+
+22. Verify Bid History.
+
+23. Test permission-controlled Edit functionality.
+
+24. Test permission-controlled Bid functionality.
+
+25. Test permission-controlled Bid History deletion.
+
+26. Test auction cancellation.
+
+27. Test closed auction removal.
+
+28. QUICK ROLE SUMMARY
+
+ADMIN:
+
+Creates the Superuser account, manages the system, approves/rejects auctions, manages permissions, and performs administrative operations.
+
+GENERAL USER:
+
+Registers and logs in through the application, creates auctions, views live auctions, bids when permitted, manages their own auctions, and views bidding and auction results.
+
+ADMIN DOES NOT BID.
+
+GENERAL USER CAN BID ONLY WHEN THE REQUIRED PERMISSION IS PROVIDED.
+
+GENERAL USER CAN CANCEL THEIR OWN AUCTIONS WHERE ALLOWED.
+
+EDIT, BID, AND BID HISTORY DELETE OPERATIONS ARE PERMISSION CONTROLLED.
+
+WINNING BID AND WINNER INFORMATION ARE SHOWN AFTER THE AUCTION IS CLOSED.
+
+30. MAIN APPLICATION CONCEPT
+
+The main concept of the application is:
+
+USER REGISTRATION
+→ LOGIN
+→ PERMISSION
+→ AUCTION CREATION
+→ ADMIN APPROVAL
+→ AUCTION START
+→ LIVE BIDDING
+→ AUCTION CLOSING
+→ WINNER SELECTION
+→ RESULT DISPLAY
+→ BID HISTORY
+
+This represents the complete workflow of the Auction Management System.
