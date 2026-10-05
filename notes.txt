@@ -596,3 +596,91 @@ USER REGISTRATION
 → BID HISTORY
 
 This represents the complete workflow of the Auction Management System.
+
+
+
+--------------------------------------------------------------------------------------------------
+
+The **`Transaction` model** was added to represent what happens **after an auction is completed**.
+
+The PDF explicitly says that after an auction is completed, a basic transaction record should be created containing:
+
+* Transaction ID
+* Auction
+* Seller
+* Buyer / Winner
+* Winning Amount
+* Transaction Status
+* Transaction Date 
+
+So the flow is:
+
+```text
+Auction
+   ↓
+Users place bids
+   ↓
+Auction ends
+   ↓
+Highest bidder = Winner
+   ↓
+Auction is CLOSED
+   ↓
+Transaction record is created
+```
+
+For example:
+
+```text
+Auction:
+    Item: MacBook Pro
+    Seller: Dion
+    Highest Bid: ₹85,000
+    Winner: Alexander
+
+                ↓
+
+Transaction:
+    Transaction ID: 1024
+    Auction: MacBook Pro
+    Seller: Dion
+    Buyer/Winner: Alexander
+    Winning Amount: ₹85,000
+    Status: Pending
+    Date: 4 Oct 2026
+```
+
+### Why not just store the winner in `Auction`?
+
+Because they serve **two different purposes**.
+
+`Auction` answers:
+
+> **Who won this particular auction?**
+
+Whereas `Transaction` answers:
+
+> **What financial/business transaction resulted from this completed auction?**
+
+The PDF also establishes that **one completed auction can generate one transaction** and that users can participate in multiple transactions as buyer or seller. 
+
+So both are added:
+
+```text
+Auction
+├── winner
+└── winning_amount
+
+Transaction
+├── auction
+├── seller
+├── buyer/winner
+├── winning_amount
+├── status
+└── transaction_date
+```
+
+And importantly, **this is not a payment gateway**. The PDF specifically says online payment integration is outside the initial version. 
+
+So `Transaction` is essentially a **record of the completed auction outcome**, not an actual online payment processor.
+We can later integrate online payment processor using RazorPay APIs as a future scope.
