@@ -8,4 +8,6 @@ urlpatterns = [
     path('edit-auction/<int:auction_id>/', views.edit_auction, name='edit_auction'),
     path('cancel-auction/<int:auction_id>/', views.cancel_auction, name='cancel_auction'),
     path('timer/<int:auction_id>/', views.auction_timer, name='auction_timer'),
+    path('predict-category/',views.auction_image_prediction,name='auction_image_prediction'),
+    path('prediction-status/<int:prediction_id>/', views.auction_image_prediction_status, name='auction_image_prediction_status'),
 ]

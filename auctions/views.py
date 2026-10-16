@@ -2,41 +2,91 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect
 from django.http import HttpRequest, HttpResponse, JsonResponse
+from django.views.decorators.http import require_POST
+from django.shortcuts import get_object_or_404
 
 from .forms import AuctionForm
 from .models import Auction, Category
 from bids.models import Bid
 from django.db.models import Prefetch
+from .models import AuctionImage
 from decimal import Decimal, InvalidOperation
 from permissionApp.decorators import permission_required
+from .fashion_prediction import predict_auction_category
+from .tasks import predict_auction_category_task
+
 
 @login_required
 def create_auction(request):
     categories = Category.objects.all()
 
-    if request.method == 'POST':
-        form = AuctionForm(request.POST,request.FILES)
+    if request.method == "POST":
+        form = AuctionForm(request.POST, request.FILES)
 
         if form.is_valid():
+            prediction_id = request.POST.get("prediction_id", "")
+
+            saved_image = None
+
+            if prediction_id.isdigit():
+                saved_image = AuctionImage.objects.filter(
+                    id=int(prediction_id),
+                    user=request.user
+                ).first()
+
+            predicted_category = (
+                saved_image.predicted_category
+                if saved_image else ""
+            )
+
+            if not predicted_category and not form.cleaned_data.get("category"):
+                form.add_error(
+                    "category",
+                    "Please select a category manually."
+                )
+
+            if form.errors:
+                return render(request, "auctions/create_auction.html", {
+                    "categories": categories,
+                    "form": form,
+                    "data": request.POST,
+                    "prediction_id": prediction_id,
+                })
+
             auction = form.save(commit=False)
             auction.seller = request.user
-            auction.status = 'PENDING'
+            auction.status = "PENDING"
+
+            if predicted_category:
+                auction.predicted_category = predicted_category
+                auction.category = None
+            else:
+                auction.predicted_category = ""
+
+            if not request.FILES.get("image") and saved_image:
+                auction.image = saved_image.image
+
             auction.save()
 
-            messages.success(request,'Auction created successfully and sent for admin approval.')
+            messages.success(
+                request,
+                "Auction created successfully and sent for admin approval."
+            )
 
-            return redirect('my_auctions')
+            return redirect("my_auctions")
 
-        else:
-            return render(request, 'auctions/create_auction.html', {
-                'categories': categories,
-                'form': form,
-                'data': request.POST
-            })
+        return render(request, "auctions/create_auction.html", {
+            "categories": categories,
+            "form": form,
+            "data": request.POST,
+            "prediction_id": request.POST.get("prediction_id", ""),
+        })
 
-    return render(request,'auctions/create_auction.html', {
-        'categories': categories
+    return render(request, "auctions/create_auction.html", {
+        "categories": categories,
+        "form": AuctionForm(),
     })
+
 
 
 @login_required
@@ -228,11 +278,62 @@ def cancel_auction(request, auction_id):
     return redirect('my_auctions')
 
 
-
 def auction_timer(request, auction_id):
     auction = Auction.objects.get(id=auction_id)
 
     return JsonResponse({
         "status": True,
         "start_datetime": auction.start_datetime.isoformat()
+    })
+
+
+
+
+@login_required
+@require_POST
+def auction_image_prediction(request):
+    image = request.FILES.get('image')
+
+    if not image:
+        return JsonResponse({
+            'success': False,
+            'message': 'Please select an image first.'
+        }, status=400)
+
+    uploaded_image = AuctionImage.objects.create(
+        user=request.user,
+        image=image
+    )
+
+    try:
+        predict_auction_category_task.delay(uploaded_image.id)
+    except Exception:
+        uploaded_image.status = 'FAILED'
+        uploaded_image.save(update_fields=['status'])
+
+        return JsonResponse({
+            'success': False,
+            'message': 'Could not start prediction. Please try again.'
+        }, status=500)
+
+    return JsonResponse({
+        'success': True,
+        'prediction_id': uploaded_image.id,
+        'image_url': uploaded_image.image.url,
+        'status': uploaded_image.status
+    })
+
+
+@login_required
+def auction_image_prediction_status(request, prediction_id):
+    prediction = get_object_or_404(
+        AuctionImage,
+        id=prediction_id,
+        user=request.user
+    )
+
+    return JsonResponse({
+        'status': prediction.status,
+        'category': prediction.predicted_category,
+        'confidence': prediction.confidence
     })

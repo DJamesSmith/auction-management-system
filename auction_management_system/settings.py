@@ -23,7 +23,7 @@ INSTALLED_APPS = [
     'accounts',
     'auctions',
     'bids',
-    'permissionApp'
+    'permissionApp',
 ]
 
 MIDDLEWARE = [
@@ -112,6 +112,11 @@ AUTHENTICATION_BACKENDS = ["accounts.backends.EmailOrPhoneBackend"]             
 #         'rest_framework.parsers.FormParser',
 #     ]
 # }
+
+
+# Celery Configuration
+CELERY_BROKER_URL = 'redis://127.0.0.1:6379/0'
+CELERY_RESULT_BACKEND = 'redis://127.0.0.1:6379/0'
 
 
 # NOTE

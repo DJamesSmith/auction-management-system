@@ -25,7 +25,8 @@ class Auction(models.Model):
     )
 
     seller = models.ForeignKey(User, on_delete=models.CASCADE, related_name='auctions')
-    category = models.ForeignKey(Category, on_delete=models.PROTECT, related_name='auctions')
+    category = models.ForeignKey(Category, on_delete=models.PROTECT, related_name='auctions', null=True, blank=True)
+    predicted_category = models.CharField(max_length=100,blank=True,default='')
     item_name = models.CharField(max_length=200)
     description = models.TextField()
     image = models.ImageField(upload_to='auction_images/', blank=True, null=True)
@@ -107,3 +108,31 @@ class Transaction(models.Model):
 
     def __str__(self):
         return f'Transaction for {self.auction.item_name} - ₹{self.winning_amount}'
+
+
+
+class AuctionImage(models.Model):
+    user = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name="uploaded_auction_images"
+    )
+    image = models.ImageField(upload_to="auction_images/")
+    predicted_category = models.CharField(
+        max_length=100,
+        blank=True
+    )
+    status = models.CharField(max_length=20,
+        choices=[
+            ('PENDING', 'Pending'),
+            ('PROCESSING', 'Processing'),
+            ('COMPLETED', 'Completed'),
+            ('FAILED', 'Failed'),
+        ],
+        default='PENDING'
+    )
+    confidence = models.FloatField(null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"Image prediction - {self.user}"
