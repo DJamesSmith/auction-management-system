@@ -300,10 +300,7 @@ def auction_image_prediction(request):
             'message': 'Please select an image first.'
         }, status=400)
 
-    uploaded_image = AuctionImage.objects.create(
-        user=request.user,
-        image=image
-    )
+    uploaded_image = AuctionImage.objects.create(user=request.user,image=image)
 
     try:
         predict_auction_category_task.delay(uploaded_image.id)
@@ -326,11 +323,7 @@ def auction_image_prediction(request):
 
 @login_required
 def auction_image_prediction_status(request, prediction_id):
-    prediction = get_object_or_404(
-        AuctionImage,
-        id=prediction_id,
-        user=request.user
-    )
+    prediction = get_object_or_404(AuctionImage, id=prediction_id, user=request.user)
 
     return JsonResponse({
         'status': prediction.status,

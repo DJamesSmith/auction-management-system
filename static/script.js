@@ -102,7 +102,6 @@ $(document).ready(function () {
     // Start category prediction
     $("#predictCategoryBtn").click(function(e) {
         e.preventDefault();
-
         const imageFile = $("#auctionImage")[0].files[0];
 
         if (!imageFile) {
